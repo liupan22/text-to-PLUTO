@@ -1,0 +1,207 @@
+{
+  "version": "1.0",
+  "note": "Text-to-PLUTO 受控模板注册表。只允许在下列模板上改白名单参数；不生成任意 definitions.h 或自由形式 C 代码。",
+  "defaults": {
+    "run_timeout_s": 600,
+    "max_grid_points": 4096,
+    "mu_factor": 1.0
+  },
+  "templates": {
+    "icf-multilayer-1d": {
+      "label": "1D 球形多层靶丸压缩算例",
+      "description": "PLUTO 4.4 HD，1D spherical，多层半径/密度结构；用于 A6 的 max_rho / max_logp 参数扫描与反向设计。",
+      "binary": "scan/runs/run_60/pluto",
+      "ini": "scan/runs/run_60/pluto.ini",
+      "geometry": "SPHERICAL",
+      "dimensions": 1,
+      "physics": ["HD"],
+      "radiation": false,
+      "max_T_calibrated": false,
+      "grid": {
+        "n1": {"min": 100, "max": 4096, "default": 2000, "desc": "X1 网格点数"},
+        "x1max": {"min": 0.02, "max": 1.0, "default": 0.1, "unit": "length", "desc": "计算域外半径"}
+      },
+      "time": {
+        "tstop": {"min": 1e-13, "max": 1e-6, "default": 2.0e-7, "unit": "time"},
+        "cfl": {"min": 0.1, "max": 0.8, "default": 0.4},
+        "first_dt": {"min": 1e-18, "max": 1e-9, "default": 1.0e-10, "unit": "time"}
+      },
+      "solver": {
+        "hydro": {"enum": ["hllc", "hll", "roe", "tvdlf"], "default": "hllc"}
+      },
+      "boundary": {
+        "x1beg": {"enum": ["reflective", "outflow"], "default": "reflective"},
+        "x1end": {"enum": ["outflow", "reflective"], "default": "outflow"}
+      },
+      "parameters": {
+        "R_INNER_DT": {
+          "unit": "length", "default": 2.11405483e-02, "min": 0.002, "max": 0.09,
+          "desc": "DT 燃料内半径",
+          "aliases": ["DT燃料内半径", "燃料内半径", "内半径", "DT内半径", "r_inner_dt", "inner dt radius", "inner radius"]
+        },
+        "R_GOLD": {
+          "unit": "length", "default": 2.14243749e-02, "min": 0.002, "max": 0.09,
+          "desc": "金层外半径",
+          "aliases": ["金层外半径", "金外半径", "金半径", "gold radius", "r_gold"]
+        },
+        "R_COPPER": {
+          "unit": "length", "default": 2.15866050e-02, "min": 0.002, "max": 0.09,
+          "desc": "铜层外半径",
+          "aliases": ["铜层外半径", "铜外半径", "铜半径", "copper radius", "r_copper"]
+        },
+        "R_FUEL_OUTER": {
+          "unit": "length", "default": 9.77245093e-02, "min": 0.005, "max": 0.2,
+          "desc": "燃料层外半径",
+          "aliases": ["燃料层外半径", "燃料外半径", "燃料半径", "fuel outer radius", "r_fuel_outer"]
+        },
+        "R_FOAM": {
+          "unit": "length", "default": 9.84132038e-02, "min": 0.005, "max": 0.2,
+          "desc": "泡沫层外半径",
+          "aliases": ["泡沫层外半径", "泡沫外半径", "泡沫半径", "foam radius", "r_foam"]
+        },
+        "R_BERYLLIUM": {
+          "unit": "length", "default": 9.90925233e-02, "min": 0.005, "max": 0.2,
+          "desc": "铍层外半径",
+          "aliases": ["铍层外半径", "铍外半径", "铍半径", "beryllium radius", "r_beryllium"]
+        },
+        "RHO_DT": {
+          "unit": "density", "default": 2.01776348e-01, "min": 1.0e-4, "max": 5.0,
+          "desc": "DT 燃料初始密度",
+          "aliases": ["DT密度", "燃料密度", "DT初始密度", "rho_dt", "dt density", "fuel density"]
+        },
+        "TEMP_INIT": {
+          "unit": "temperature", "default": 3.11586013e+02, "min": 10.0, "max": 5000.0,
+          "desc": "初始温度",
+          "aliases": ["初始温度", "初温", "温度初值", "temp_init", "initial temperature"]
+        }
+      },
+      "fixed_parameters": {
+        "R_OUTER": 0.1,
+        "RHO_GOLD": 19.32,
+        "RHO_COPPER": 8.96,
+        "RHO_FOAM": 0.01,
+        "RHO_BERYLLIUM": 1.85,
+        "RHO_FOAM_OUTER": 0.1,
+        "GAMMA": 1.6666667
+      },
+      "constraints": [
+        ["R_INNER_DT", "<", "R_GOLD"],
+        ["R_GOLD", "<", "R_COPPER"],
+        ["R_COPPER", "<", "R_FUEL_OUTER"],
+        ["R_FUEL_OUTER", "<", "R_FOAM"],
+        ["R_FOAM", "<", "R_BERYLLIUM"],
+        ["x1max", ">=", "R_BERYLLIUM"]
+      ],
+      "text_keywords": ["多层", "靶丸", "内爆", "燃料层", "金层", "铜层", "泡沫层", "铍层", "icf", "capsule", "multilayer"]
+    },
+    "icf-rad1d-grey": {
+      "label": "1D 球形灰体辐射驱动内爆算例",
+      "description": "PLUTO 4.4 HD + RADIATION（灰体单群 FLD），1D spherical；带 NIF 型驱动温度脉冲，用于辐射驱动烧蚀算例。",
+      "binary": "T006_rad_1D/pluto",
+      "ini": "T006_rad_1D/pluto.ini",
+      "geometry": "SPHERICAL",
+      "dimensions": 1,
+      "physics": ["HD", "RADIATION"],
+      "radiation": true,
+      "max_T_calibrated": false,
+      "grid": {
+        "n1": {"min": 64, "max": 2048, "default": 320, "desc": "X1 网格点数"},
+        "x1max": {"min": 0.05, "max": 2.0, "default": 0.5, "unit": "length", "desc": "计算域外半径"}
+      },
+      "time": {
+        "tstop": {"min": 1e-13, "max": 1e-7, "default": 1.6e-8, "unit": "time"},
+        "cfl": {"min": 0.1, "max": 0.8, "default": 0.4},
+        "first_dt": {"min": 1e-18, "max": 1e-12, "default": 1.0e-15, "unit": "time"}
+      },
+      "solver": {
+        "hydro": {"enum": ["hllc", "hll", "roe", "tvdlf"], "default": "hllc"},
+        "radiation": {"enum": ["hllc", "hll", "tvdlf"], "default": "hllc"}
+      },
+      "boundary": {
+        "x1beg": {"enum": ["reflective", "outflow"], "default": "reflective"},
+        "x1end": {"enum": ["userdef", "outflow"], "default": "userdef"}
+      },
+      "parameters": {
+        "GAMMA_EOS": {
+          "unit": null, "default": 1.6666666666666667, "min": 1.2, "max": 2.0,
+          "desc": "理想气体绝热指数",
+          "aliases": ["绝热指数", "gamma_eos", "gamma", "adiabatic index"]
+        },
+        "R_DT": {
+          "unit": "length", "default": 0.1563, "min": 0.05, "max": 0.3,
+          "desc": "DT 燃料半径",
+          "aliases": ["DT半径", "DT燃料半径", "燃料半径", "r_dt", "dt radius", "fuel radius"]
+        },
+        "R_OUT": {
+          "unit": "length", "default": 0.1736, "min": 0.06, "max": 0.4,
+          "desc": "烧蚀层外半径",
+          "aliases": ["烧蚀层外半径", "靶外半径", "外半径", "r_out", "outer radius", "ablator radius"]
+        },
+        "RHO_DT": {
+          "unit": "density", "default": 0.007, "min": 1.0e-5, "max": 0.1,
+          "desc": "DT 燃料密度",
+          "aliases": ["DT密度", "燃料密度", "rho_dt", "dt density", "fuel density"]
+        },
+        "RHO_AL": {
+          "unit": "density", "default": 2.7, "min": 0.1, "max": 10.0,
+          "desc": "铝烧蚀层密度",
+          "aliases": ["铝密度", "烧蚀层密度", "rho_al", "al density", "ablator density"]
+        },
+        "RHO_FILL": {
+          "unit": "density", "default": 1.0e-5, "min": 1.0e-9, "max": 1.0e-2,
+          "desc": "外部填充气体密度",
+          "aliases": ["填充密度", "外部密度", "真空密度", "rho_fill", "fill density"]
+        },
+        "T_INIT": {
+          "unit": "temperature", "default": 300.0, "min": 10.0, "max": 5000.0,
+          "desc": "初始温度",
+          "aliases": ["初始温度", "初温", "t_init", "initial temperature"]
+        },
+        "T_FOOT": {
+          "unit": "temperature", "default": 928361.44, "min": 1.0e4, "max": 1.0e7,
+          "desc": "驱动 foot 温度（约 80 eV）",
+          "aliases": ["foot温度", "foot 温度", "foot", "驱动预热温度", "t_foot", "foot temperature", "drive foot"]
+        },
+        "T_PEAK": {
+          "unit": "temperature", "default": 2959152.09, "min": 1.0e4, "max": 1.0e7,
+          "desc": "驱动峰值温度（约 255 eV）",
+          "aliases": ["峰值驱动温度", "驱动峰值温度", "峰值温度", "t_peak", "peak drive temperature", "peak temperature"]
+        },
+        "T_RAMP0": {
+          "unit": "time", "default": 8.0e-9, "min": 0.0, "max": 1.0e-7,
+          "desc": "温度脉冲爬升起点",
+          "aliases": ["爬升起点", "脉冲起点", "t_ramp0", "ramp start"]
+        },
+        "T_RAMP1": {
+          "unit": "time", "default": 12.0e-9, "min": 0.0, "max": 1.0e-7,
+          "desc": "温度脉冲到达峰值时间",
+          "aliases": ["爬升终点", "脉冲终点", "到达峰值时间", "t_ramp1", "ramp end"]
+        },
+        "KAPPA0": {
+          "unit": null, "default": 100.0, "min": 0.1, "max": 1.0e4,
+          "desc": "灰体吸收系数",
+          "aliases": ["吸收系数", "不透明度", "kappa0", "opacity", "absorption coefficient"]
+        },
+        "P_FILL": {
+          "unit": "pressure", "default": 1.0e8, "min": 1.0e6, "max": 1.0e10,
+          "desc": "外部填充气体压力下限",
+          "aliases": ["填充压力", "压力下限", "p_fill", "fill pressure"]
+        }
+      },
+      "fixed_parameters": {
+        "CONST_RAD": 7.5657e-15,
+        "CONST_IDEALGAS": 3.247353586e-7,
+        "REDUCED_C": 1.0e9,
+        "RAD_C": 2.99792458e10,
+        "FLUX_FRAC": 0.25
+      },
+      "constraints": [
+        ["R_DT", "<", "R_OUT"],
+        ["T_FOOT", "<=", "T_PEAK"],
+        ["T_RAMP0", "<", "T_RAMP1"],
+        ["x1max", ">", "R_OUT"]
+      ],
+      "text_keywords": ["辐射驱动", "辐射烧蚀", "灰体", "FLD", "辐射流体", "驱动温度", "黑体", "radiation driven", "grey", "radiative"]
+    }
+  }
+}

@@ -1,0 +1,23 @@
+# jijiang-text-to-pluto 技能配置
+bridge: http://127.0.0.1:8765/run
+engine: /mnt/f/FusionAgentHub/pluto/pluto_runner.py
+pluto_root: /mnt/f/PLUTO
+workspace: /mnt/f/FusionWorkspace
+extractor: /mnt/f/FusionWorkspace/scripts/pluto_vtk_extract.py
+
+defaults:
+  timeout: 600
+  confirm: false
+  template: auto
+  mu_factor: 1.0
+
+templates:
+  icf-multilayer-1d:
+    binary: /mnt/f/PLUTO/scan/runs/run_60/pluto
+    ini: /mnt/f/PLUTO/scan/runs/run_60/pluto.ini
+  icf-rad1d-grey:
+    binary: /mnt/f/PLUTO/T006_rad_1D/pluto
+    ini: /mnt/f/PLUTO/T006_rad_1D/pluto.ini
+
+# v1 仅复用已编译二进制；不修改 definitions.h、不重新编译
+build: reuse_only

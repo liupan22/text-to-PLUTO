@@ -1,0 +1,60 @@
+{
+  "cases": [
+    {
+      "name": "合法多层 spec",
+      "spec": {
+        "schema_version": "1.0",
+        "case": "fixture-a",
+        "template": "icf-multilayer-1d",
+        "params": {
+          "R_INNER_DT": 0.02,
+          "R_GOLD": 0.021,
+          "R_COPPER": 0.022,
+          "R_FUEL_OUTER": 0.09,
+          "R_FOAM": 0.095,
+          "R_BERYLLIUM": 0.099,
+          "RHO_DT": 0.2,
+          "TEMP_INIT": 300
+        },
+        "grid": {"n1": 1000, "x1max": 0.1},
+        "time": {"tstop": 2e-10}
+      },
+      "expect": true
+    },
+    {
+      "name": "缺 schema_version",
+      "spec": {"case": "fixture-b", "template": "icf-multilayer-1d"},
+      "expect": false
+    },
+    {
+      "name": "非法参数名",
+      "spec": {
+        "schema_version": "1.0",
+        "case": "fixture-c",
+        "template": "icf-multilayer-1d",
+        "params": {"rm -rf": 1}
+      },
+      "expect": false
+    },
+    {
+      "name": "参数值为非法字符串",
+      "spec": {
+        "schema_version": "1.0",
+        "case": "fixture-d",
+        "template": "icf-rad1d-grey",
+        "params": {"R_DT": "abc"}
+      },
+      "expect": false
+    },
+    {
+      "name": "grid 非对象",
+      "spec": {
+        "schema_version": "1.0",
+        "case": "fixture-e",
+        "template": "icf-rad1d-grey",
+        "grid": []
+      },
+      "expect": false
+    }
+  ]
+}

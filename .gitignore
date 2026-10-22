@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+runs/
+workspace/
+*.vtk
+*.log
+result.json
+latest.json

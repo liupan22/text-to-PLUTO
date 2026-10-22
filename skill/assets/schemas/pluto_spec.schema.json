@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://fusion-agenthub.local/schemas/pluto_spec.schema.json",
+  "title": "Text-to-PLUTO 受控算例 spec",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "case", "template"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "case": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$"},
+    "template": {"enum": ["icf-multilayer-1d", "icf-rad1d-grey"]},
+    "text": {"type": "string", "maxLength": 2000},
+    "params": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [{"type": "number"}, {"type": "string", "pattern": "^[-+0-9.eE]+\\s*[A-Za-zµμ/^0-9]*$"}]
+      },
+      "description": "仅允许模板白名单键；数值按 cgs，字符串可带单位（0.15 mm / 80 eV / 0.2 ns）"
+    },
+    "grid": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "n1": {"oneOf": [{"type": "integer", "minimum": 64, "maximum": 4096},
+                          {"type": "string", "pattern": "^[0-9]+$"}]},
+        "x1max": {"oneOf": [{"type": "number", "exclusiveMinimum": 0},
+                             {"type": "string"}]}
+      }
+    },
+    "time": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tstop": {"oneOf": [{"type": "number", "exclusiveMinimum": 0}, {"type": "string"}]},
+        "cfl": {"oneOf": [{"type": "number", "minimum": 0.1, "maximum": 0.8}, {"type": "string"}]},
+        "first_dt": {"oneOf": [{"type": "number", "exclusiveMinimum": 0}, {"type": "string"}]}
+      }
+    },
+    "solver": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hydro": {"enum": ["hllc", "hll", "roe", "tvdlf"]},
+        "radiation": {"enum": ["hllc", "hll", "tvdlf"]}
+      }
+    },
+    "boundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x1beg": {"enum": ["reflective", "outflow"]},
+        "x1end": {"enum": ["userdef", "outflow", "reflective"]}
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "vtk_interval": {"oneOf": [{"type": "number", "exclusiveMinimum": 0}, {"type": "string"}]},
+        "mu_factor": {"oneOf": [{"type": "number", "exclusiveMinimum": 0}, {"type": "string"}]}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "max_rho": {"$ref": "#/definitions/target"},
+        "max_p_over_rho": {"$ref": "#/definitions/target"},
+        "max_logp": {"$ref": "#/definitions/target"},
+        "max_T_K": {"$ref": "#/definitions/target"}
+      }
+    },
+    "assumptions": {"type": "array", "items": {"type": "string"}},
+    "trace": {"type": "object"},
+    "notes": {"type": "string"}
+  },
+  "definitions": {
+    "target": {
+      "oneOf": [
+        {"type": "number"},
+        {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {"type": "number"}
+        }
+      ]
+    }
+  }
+}
